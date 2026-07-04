@@ -1,0 +1,10 @@
+config.py
+invoices.db
+INV_*/
+__pycache__/
+*.pyc
+
+!INV_Jane_Smith/
+!INV_Jane_Smith/**
+!INV_Bob_Jones/
+!INV_Bob_Jones/**

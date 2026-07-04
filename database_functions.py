@@ -1,0 +1,268 @@
+import sqlite3
+import tabulate
+import shutil
+
+def create_tables():
+    conn = sqlite3.connect("invoices.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS clients (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
+            phone TEXT NOT NULL,
+            address TEXT NOT NULL
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS invoices (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            client_id INTEGER NOT NULL,
+            code TEXT,
+            issue_date TEXT NOT NULL,
+            due_date TEXT NOT NULL,
+            paid INTEGER NOT NULL DEFAULT 0,
+            paid_date TEXT,
+            total FLOAT,
+            FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS invoice_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            invoice_id INTEGER NOT NULL,
+            description TEXT NOT NULL,
+            item_date TEXT NOT NULL,
+            quantity FLOAT NOT NULL,
+            rate FLOAT NOT NULL,
+            FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
+        )
+
+    """)
+    
+    conn.commit()
+    conn.close()
+
+
+def update_invoice_codes(cursor, client_id):
+    # get client initials
+    cursor.execute("SELECT name FROM clients WHERE id = ?", (client_id,))
+    name = cursor.fetchone()[0]
+    parts = name.split()
+    initials = (parts[0][0] + parts[-1][0]).upper()
+
+    # get all invoices for this client ordered by issue date
+    cursor.execute("""
+        SELECT id FROM invoices
+        WHERE invoices.client_id = ?
+        ORDER BY issue_date
+    """, (client_id,))
+    invoices = cursor.fetchall()
+
+    # renumber sequentially from 1
+    for index, inv_id in enumerate(invoices, start=1):
+        new_number = index
+        
+        cursor.execute("UPDATE invoices SET code = ? WHERE id = ?",
+            (f'{str(new_number).zfill(3)}{initials}', inv_id[0]),)
+
+def add_client(name, email, phone, address):
+    # Open (or create) the database file, and get a connection to it
+    conn = sqlite3.connect("invoices.db")
+
+    # Get a cursor — the object we use to actually run commands
+    cursor = conn.cursor()
+
+    # Run the SQL insert. The ? marks are placeholders, filled in
+    # by the tuple below, in order. This avoids putting raw values
+    # directly into the SQL string (safer, and handles quotes/special
+    # characters correctly).
+    try:
+        cursor.execute(
+        "INSERT INTO clients (name, email, phone, address) VALUES (?, ?, ?, ?)",
+        (name, email, phone, address)
+        )
+        client_id = cursor.lastrowid
+        print(f"Added client: {name}, ID: {client_id}")
+
+    except sqlite3.IntegrityError:
+        print("A client with this email already exists")
+
+    
+    # Actually save the change to the file
+    conn.commit()
+
+    # Close the connection, we're done with it
+    conn.close()
+
+
+def add_invoice_with_items(client_id, issue_date, due_date):
+    conn = sqlite3.connect("invoices.db")
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO invoices (client_id, issue_date, due_date, paid) VALUES (?, ?, ?, ?)",
+        (client_id, issue_date, due_date, 0)
+    )
+    invoice_id = cursor.lastrowid
+    items_added = 0
+
+    while True:
+        description = input("Item description (or blank to finish): ")
+        if description == "":
+            break
+        
+        item_date = input("Item date: ")
+        quantity = float(input("Quantity/hours: "))
+        rate = float(input("Rate: "))
+        
+        cursor.execute(
+            "INSERT INTO invoice_items (invoice_id, description, item_date, quantity, rate) VALUES (?, ?, ?, ?, ?)",
+            (invoice_id, description, item_date, quantity, rate)
+        )
+        items_added += 1
+
+    if items_added == 0:
+        conn.rollback()
+        conn.close()
+        print("No items entered - invoice cancelled, nothing saved")
+        return
+    
+    update_invoice_codes(cursor, client_id)
+
+    conn.commit()
+    conn.close()
+
+    print(f"Created invoice {invoice_id} with line items")
+    return invoice_id
+
+def remove_client(client_id):
+    conn = sqlite3.connect("invoices.db")
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA foreign_keys = ON")
+    cursor.execute("""
+    DELETE from clients
+    WHERE clients.id = ?
+    """, (client_id,))
+    conn.commit()
+    conn.close()
+    print(f" Client {client_id} has been removed")
+
+def remove_invoice(invoice_id):
+    conn = sqlite3.connect("invoices.db")
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA foreign_keys = ON")
+    cursor.execute("""
+    DELETE from invoices
+    WHERE invoices.id = ?
+    """, (invoice_id,))
+    conn.commit()
+    conn.close()
+    print(f"Invoice {invoice_id} has been removed")
+
+def mark_paid(invoice_id, paid_date):
+    conn = sqlite3.connect("invoices.db")
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE invoices SET paid = 1, paid_date = ? WHERE id = ?",
+        (paid_date, invoice_id)
+    )
+    conn.commit()
+    conn.close()
+    print(f"Marked invoice {invoice_id} as paid")
+
+def show_clients():
+    conn = sqlite3.connect("invoices.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, email, phone, address FROM clients ORDER BY id")
+    rows = cursor.fetchall()
+
+    headers = ["ID", "Name", "Email", "Phone", "Address"]
+    print(tabulate.tabulate(rows, headers=headers, tablefmt="grid"))
+
+def show_all_invoices():
+    conn = sqlite3.connect("invoices.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+    SELECT invoices.id, invoices.code, clients.name, invoices.issue_date, SUM(invoice_items.quantity * invoice_items.rate) AS total, invoices.paid, invoices.paid_date
+    FROM invoices
+    JOIN clients ON invoices.client_id = clients.id
+    JOIN invoice_items ON invoice_items.invoice_id = invoices.id
+    GROUP BY invoices.id
+    ORDER BY invoices.due_date
+    """
+    )
+    rows = cursor.fetchall()
+    headers = ["Invoice ID", "INV Code", "Client Name", "Issue Date", "TOTAL", "Paid", "Paid_Date"]
+    print(tabulate.tabulate(rows, headers=headers, tablefmt="grid"))
+
+def show_unpaid_invoices():
+    conn = sqlite3.connect("invoices.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+    SELECT invoices.id, clients.name, invoices.due_date, SUM(invoice_items.quantity * invoice_items.rate) AS total
+    FROM invoices
+    JOIN clients ON invoices.client_id = clients.id
+    JOIN invoice_items ON invoice_items.invoice_id = invoices.id
+    WHERE invoices.paid = 0
+    GROUP BY invoices.id
+    ORDER BY invoices.due_date
+    """
+    )
+    rows = cursor.fetchall()
+    headers = ["Invoice ID", "Client Name", "Due Date", "TOTAL"
+    ]
+    print(tabulate.tabulate(rows, headers=headers, tablefmt='grid'))
+
+def show_invoice_items(invoice_id):
+    conn = sqlite3.connect("invoices.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+    SELECT invoices.id, clients.name, invoices.due_date, invoice_items.description, invoice_items.quantity, invoice_items.rate, (invoice_items.quantity * invoice_items.rate) as subtotal
+    FROM invoices
+    JOIN clients ON clients.id = invoices.client_id
+    JOIN invoice_items ON invoice_items.invoice_id = invoices.id
+    WHERE invoices.id = ?
+    """, (invoice_id,))
+
+    rows = cursor.fetchall()
+    headers = ["Invoice ID", "Client Name", "Invoice Due Date", "Item Description", "Quantity", "Rate", "SUBTOTAL"]
+    print(tabulate.tabulate(rows, headers=headers, tablefmt="grid"))
+
+def show_revenue(from_date, to_date):
+    conn = sqlite3.connect("invoices.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT SUM(invoice_items.quantity * invoice_items.rate) AS total_revenue
+    FROM invoices
+    JOIN invoice_items ON invoice_items.invoice_id = invoices.id
+    WHERE invoices.paid = 1
+    AND invoices.paid_date BETWEEN ? AND ?
+    """, (from_date, to_date))
+    
+    total = cursor.fetchone()[0]
+    conn.close
+    print(f' The revenue from {from_date} to {to_date} is ${total}')
+
+def get_invoice_data(invoice_id):
+    conn =sqlite3.connect("invoices.db")
+    cursor = conn.cursor()
+    cursor.execute("""SELECT clients.name, clients.address, clients.email, clients.phone, invoices.code, invoices.issue_date, invoices.due_date,  invoice_items.item_date, invoice_items.description, invoice_items.quantity, invoice_items.rate, invoice_items.rate * invoice_items.quantity AS subtotal
+                   FROM invoices
+                   JOIN clients ON clients.id = invoices.client_id
+                   JOIN invoice_items ON invoice_items.invoice_id = invoices.id
+                   WHERE invoices.id = ?
+                   """, (invoice_id, ))
+    data = cursor.fetchall()
+    conn.commit()
+    conn.close()
+    return data
+
+
+def backup_database():
+    backup_name = f"invoices_backup_{date.today().isoformat()}.db"
+    shutil.copy2("invoices.db", backup_name)
+    print(f"Backed up to {backup_name}")
+
+
+                  
