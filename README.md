@@ -17,7 +17,15 @@ A command line invoice management tool for small businesses. Manage clients, cre
 ```
 pip install reportlab tabulate
 ```
+## Installation
 
+```bash
+git clone https://github.com/bulker-code/Invoice_CLI.git
+cd Invoice_CLI
+pip install reportlab tabulate
+```
+
+Then copy `config_example.py` to `config.py` and fill in your business details.
 ## Setup
 - Clone the repo from github. 
 - Copy the config_example.py and rename it config.py, and fill in your business details.
