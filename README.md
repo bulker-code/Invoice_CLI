@@ -84,6 +84,12 @@ python invoice_cli.py mark-paid --invoice-code 001JS --paid-date 2026-07-09
 python invoice_cli.py calculate-revenue --from-date 2025-07-01 --to-date 2026-06-30
 ```
 
+**generate-pdf** - Generates a new pdf for an existing invoice
+
+```
+python invoice_cli.py generate-pdf --invoice-code 001JS
+```
+
 **backup-database** - Creates a backup copy of the SQLite database labelled with today's date
 
 ```
