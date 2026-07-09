@@ -14,13 +14,17 @@ A command line invoice management tool for small businesses. Manage clients, cre
 
 ## Requirements
 - Python 3.8+
-```
+
+## Installation
+
+```bash
+git clone https://github.com/bulker-code/Invoice_CLI.git
+cd Invoice_CLI
 pip install reportlab tabulate
 ```
-
-## Setup
-- Clone the repo from github. 
-- Copy the config_example.py and rename it config.py, and fill in your business details.
+1. Copy `config_example.py` to `config.py`
+2. Fill in your business details in `config.py`
+3. Run `python invoice_cli.py --help` to verify the installation
 
 ## Usage
 
@@ -82,6 +86,12 @@ python invoice_cli.py mark-paid --invoice-code 001JS --paid-date 2026-07-09
 
 ```
 python invoice_cli.py calculate-revenue --from-date 2025-07-01 --to-date 2026-06-30
+```
+
+**generate-pdf** - Generates a new pdf for an existing invoice
+
+```
+python invoice_cli.py generate-pdf --invoice-code 001JS
 ```
 
 **backup-database** - Creates a backup copy of the SQLite database labelled with today's date
