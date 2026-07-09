@@ -82,6 +82,12 @@ python invoice_cli.py mark-paid --invoice-code 001JS
 python invoice_cli.py calculate-revenue --from-date 2025-07-01 --to-date 2026-06-30
 ```
 
+**backup-database**
+
+```
+python invoice_cli.py backup-database
+```
+
 ## File structure
 - **invoice_cli.py** - primary python file holding cli commands. Run this file to use the tool.
 - **database_functions.py** - stores all functions where direct interaction with the SQLite database is required
