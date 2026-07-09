@@ -14,9 +14,9 @@ A command line invoice management tool for sole traders. Manage clients, create 
 
 ## Requirements
 - Python 3.8+
-  ```
-  pip install reportlab tabulate
-  ```
+```
+pip install reportlab tabulate
+```
 
 ## Setup
 - Clone the repo from github. 
@@ -42,49 +42,49 @@ python invoice_cli.py remove-client --client-id 1
 python invoice_cli.py show-clients
 ```
 
-**add-invoice-with-items**
+**add-invoice-with-items** - Create a new invoice interactively, prompting for line items. PDF is automatically generated and saved on completion.
 
 ```
 python invoice_cli.py add-invoice-with-items --client-id 1 --issue-date 2026-07-09
 ```
 
-**remove-invoice**
+**remove-invoice** - Removes invoice by id
 
 ```
 python invoice_cli.py remove-invoice --invoice-id 1
 ```
 
-**show-all-invoices**
+**show-all-invoices** - Shows tables of all invoices
 
 ```
 python invoice_cli.py show-all-invoices
 ```
 
-**show-unpaid-invoices**
+**show-unpaid-invoices** - Shows table of all unpaid invoices
 
 ```
 python invoice_cli.py show-unpaid-invoices
 ```
 
-**show-invoice-items**
+**show-invoice-items** - Display all line items for a specific invoice
 
 ```
 python invoice_cli.py show-invoice-items --invoice-id 1
 ```
 
-**mark-paid**
+**mark-paid** - Mark an invoice as paid using its invoice code and the date payment was received
 
 ```
-python invoice_cli.py mark-paid --invoice-code 001JS
+python invoice_cli.py mark-paid --invoice-code 001JS --paid-date 2026-07-09
 ```
 
-**calculate-revenue**
+**calculate-revenue** - Shows revenue of invoices paid between selected dates
 
 ```
 python invoice_cli.py calculate-revenue --from-date 2025-07-01 --to-date 2026-06-30
 ```
 
-**backup-database**
+**backup-database** - Creates a backup copy of the SQLite database labelled with today's date
 
 ```
 python invoice_cli.py backup-database
@@ -94,4 +94,5 @@ python invoice_cli.py backup-database
 - **invoice_cli.py** - primary python file holding cli commands. Run this file to use the tool.
 - **database_functions.py** - stores all functions where direct interaction with the SQLite database is required
 - **pdf_generator.py** - holds function required to generate pdfs
-- **config.py** - stores business details for invoices. 
+- **config.py** - created by user to store business details. Present in gitignore.
+- **config_example.py** - shows example format for config.py
