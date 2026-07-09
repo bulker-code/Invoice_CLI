@@ -24,7 +24,10 @@ git clone https://github.com/bulker-code/Invoice_CLI.git
 cd Invoice_CLI
 pip install reportlab tabulate
 ```
-
+1. Copy `config_example.py` to `config.py`
+2. Fill in your business details in `config.py`
+3. Run `python invoice_cli.py --help` to verify the installation
+4. 
 Then copy `config_example.py` to `config.py` and fill in your business details.
 ## Setup
 - Clone the repo from github. 
