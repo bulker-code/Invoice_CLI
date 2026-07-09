@@ -22,6 +22,10 @@ A command line invoice management tool for sole traders. Manage clients, create 
 
 ## Usage: 
 The following are commands:
+
+**add-client** - Add a new client
+
+python invoice_cli.py add-client --name "Jane Smith" --email jane@example.com --phone 0412345678 --address "123 Main St"
 - **add-client** - Takes the client details --name --email --address --phone and creates a new client storing it in SQLite, with a unique client_id (an integer)
 - **remove-client** - Takes the --client-id and removes the corresponding client with a delete cascade removing all invoices and invoice items addressed to that client.
 
