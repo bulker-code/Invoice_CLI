@@ -1,6 +1,6 @@
 # INVOICE CLI
 
-A command line invoice management tool for sole traders. Manage clients, create and send professional PDF invoices, track payments, and calculate revenue of a given time period. 
+A command line invoice management tool for sole traders. Manage clients, create and send professional PDF invoices, track payments, and calculate revenue of a given time period. Built as a personal project to manage invoicing for my support work business
 
 ## Features
 
