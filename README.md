@@ -45,17 +45,43 @@ python invoice_cli.py show-clients
 ```
 python invoice_cli.py add-invoice-with-items --client-id 1 --issue-date 2026-07-09
 ```
-## Usage: 
-The following are commands:
 
-**add-client** - Add a new client
+**remove-invoice**
 
-python invoice_cli.py add-client --name "Jane Smith" --email jane@example.com --phone 0412345678 --address "123 Main St"
-- **add-client** - Takes the client details --name --email --address --phone and creates a new client storing it in SQLite, with a unique client_id (an integer)
-- **remove-client** - Takes the --client-id and removes the corresponding client with a delete cascade removing all invoices and invoice items addressed to that client.
+```
+python invoice_cli.py remove-invoice --invoice-id 1
+```
 
+**show-all-invoices**
 
-one block per command showing the actual command and what it does
+```
+python invoice_cli.py show-all-invoices
+```
+
+**show-unpaid-invoices**
+
+```
+python invoice_cli.py show-unpaid-invoices
+```
+
+**show-invoice-items**
+
+```
+python invoice_cli.py show-invoice-items --invoice-id 1
+```
+
+**mark-paid**
+
+```
+python invoice_cli.py mark-paid --invoice-code 001JS
+```
+
+**calculate-revenue**
+
+```
+python invoice_cli.py calculate-revenue --from-date 2025-07-01 --to-date 2026-06-30
+```
+
 
 
 
