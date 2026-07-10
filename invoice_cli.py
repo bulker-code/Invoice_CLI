@@ -2,7 +2,7 @@ from datetime import date, timedelta, datetime
 import argparse
 from database_functions import create_tables, add_client, add_invoice_with_items, \
 remove_client, remove_invoice, mark_paid, show_clients, show_all_invoices, show_unpaid_invoices, \
-backup_database, show_invoice_items, calculate_revenue
+backup_database, show_invoice_items, calculate_revenue, total_unpaid
 from pdf_generator import generate_invoice_pdf
 
 if __name__ == "__main__":
@@ -50,6 +50,10 @@ p = subparsers.add_parser("mark-paid")
 p.add_argument("--invoice-code", type=str, required=True)
 p.add_argument("--paid-date", type=date.fromisoformat, required=True)
 
+#total-unpaid
+p = subparsers.add_parser("total-unpaid")
+p.add_argument("--client-id", type=int, required=True)
+
 #calculate-revenue
 p = subparsers.add_parser("calculate-revenue")
 p.add_argument("--from-date", type=date.fromisoformat, required=True)
@@ -94,6 +98,9 @@ elif args.command == "show-invoice-items":
 
 elif args.command == "mark-paid":
     mark_paid(args.invoice_code, args.paid_date.isoformat())
+
+elif args.command == "total-unpaid":
+    total_unpaid(args.client_id)
 
 elif args.command == "calculate-revenue":
     calculate_revenue(args.from_date.isoformat(), args.to_date.isoformat())

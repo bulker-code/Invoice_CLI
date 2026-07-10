@@ -232,6 +232,23 @@ def show_invoice_items(invoice_code):
     headers = ["ID", "Invoice CODE", "Client Name", "Invoice Due Date", "Item Description", "Quantity", "Rate", "SUBTOTAL"]
     print(tabulate.tabulate(rows, headers=headers, tablefmt="grid"))
 
+def total_unpaid(client_id):
+    conn = sqlite3.connect("invoices.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT SUM(invoice_items.quantity * invoice_items.rate) AS total_revenue
+    FROM invoices
+    JOIN invoice_items ON invoice_items.invoice_id = invoices.id
+    WHERE invoices.paid = 0 and invoices.client_id = ?
+    """, (client_id,))
+
+    total_unpaid = cursor.fetchone()[0]
+    conn.close
+    print(f"Total of unpaid invoices for client {client_id} is: {total_unpaid}")
+
+    
+
 def calculate_revenue(from_date, to_date):
     conn = sqlite3.connect("invoices.db")
     cursor = conn.cursor()
