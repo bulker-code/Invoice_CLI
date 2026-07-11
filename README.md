@@ -82,7 +82,7 @@ python invoice_cli.py show-invoice-items --invoice-code 001JS
 python invoice_cli.py mark-paid --invoice-code 001JS --paid-date 2026-07-09
 ```
 
-**calculate-revenue** - Shows revenue of invoices paid between selected dates
+**calculate-revenue** - Shows total revenue of invoices paid between selected dates
 
 ```
 python invoice_cli.py calculate-revenue --from-date 2025-07-01 --to-date 2026-06-30
