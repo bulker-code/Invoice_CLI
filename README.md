@@ -45,6 +45,15 @@ python invoice_cli.py remove-client --client-id 1
 ```
 python invoice_cli.py show-clients
 ```
+```
++----+------------+-------------------+-------------+---------------------------+
+| ID | Name       | Email             | Phone       | Address                   |
++====+============+===================+=============+===========================+
+|  1 | Jane Smith | jane@example.com  | 0412345678  | 123 Main St, Brisbane     |
++----+------------+-------------------+-------------+---------------------------+
+|  2 | Bob Jones  | bob@example.com   | 0423456789  | 456 Example Rd, Sydney    |
++----+------------+-------------------+-------------+---------------------------+
+```
 
 **add-invoice-with-items** - Create a new invoice interactively, prompting for line items. PDF is automatically generated and saved on completion.
 
