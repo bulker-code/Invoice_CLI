@@ -18,8 +18,8 @@ A command line invoice management tool for small businesses. Manage clients, cre
 ## Installation
 
 ```bash
-git clone https://github.com/bulker-code/Invoice_CLI.git
-cd Invoice_CLI
+git clone https://github.com/bulker-code/invoice_cli.git
+cd invoice_cli
 pip install reportlab tabulate
 ```
 1. Copy `config_example.py` to `config.py`
