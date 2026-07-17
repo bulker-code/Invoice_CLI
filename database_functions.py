@@ -24,7 +24,6 @@ def create_tables():
             due_date TEXT NOT NULL,
             paid INTEGER NOT NULL DEFAULT 0,
             paid_date TEXT,
-            total FLOAT,
             FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
         )
     """)
