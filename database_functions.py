@@ -1,4 +1,5 @@
 import sqlite3
+import csv
 import tabulate
 import shutil
 from datetime import date
@@ -283,3 +284,36 @@ def backup_database():
     backup_name = f"invoices_backup_{date.today().isoformat()}.db"
     shutil.copy2("invoices.db", backup_name)
     print(f"Backed up to {backup_name}")
+
+def export_csv():
+    conn = sqlite3.connect("invoices.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT invoices.code, clients.name, clients.email, invoices.issue_date, SUM(invoice_items.quantity * invoice_items.rate) AS total, invoices.paid, invoices.paid_date
+        FROM invoices
+        JOIN clients ON invoices.client_id = clients.id
+        JOIN invoice_items ON invoice_items.invoice_id = invoices.id
+        GROUP BY invoices.id
+        ORDER BY invoices.due_date
+        """)
+    rows = cursor.fetchall()
+    #cursor.execute("SUM(invoice_items.quantity * invoice_items.rate) AS total_revenue")
+    #total = cursor.fetchone()
+    export_name = f'Revenue_export_{date.today().isoformat()}.csv'
+    try:
+        with open(export_name, "w", newline="", encoding="utf-8") as csv_file:
+            writer = csv.writer(csv_file)
+    
+            # 4. Extract and write column headers dynamically
+            headers = ['Code', 'Name', 'Email', 'Issue Date', 'Amount', 'Paid', "Paid Date"] 
+            writer.writerow(headers)
+
+            # 5. Write all the data rows
+            writer.writerows(rows)
+    except PermissionError:
+        print("Revenue.csv is open in another program — close it and try again.")
+    conn.commit()
+    conn.close()
+    print("Export complete!")
+
+    

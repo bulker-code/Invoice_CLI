@@ -2,7 +2,7 @@ from datetime import date, timedelta, datetime
 import argparse
 from database_functions import create_tables, add_client, add_invoice_with_items, \
 remove_client, remove_invoice, mark_paid, show_clients, show_all_invoices, show_unpaid_invoices, \
-backup_database, show_invoice_items, calculate_revenue, total_unpaid
+backup_database, show_invoice_items, calculate_revenue, total_unpaid, export_csv
 from pdf_generator import generate_invoice_pdf
 
 if __name__ == "__main__":
@@ -29,10 +29,11 @@ p = subparsers.add_parser("show-clients")
 p = subparsers.add_parser("add-invoice-with-items")
 p.add_argument("--client-id", type=int, required=True)
 p.add_argument("--issue-date", type=date.fromisoformat, required = True)
+p.add_argument("--no-pdf", action="store_true")
 
 #remove-invoice
 p=subparsers.add_parser("remove-invoice")
-p.add_argument("--invoice-code", type=int, required=True)
+p.add_argument("--invoice-code", required=True)
 
 #show-all-invoices
 # eventually change to show invoices and filter based on client/s, dates, etc
@@ -66,6 +67,14 @@ p.add_argument("--invoice-code", required=True)
 #backup-database
 p = subparsers.add_parser("backup-database")
 
+#export-csv
+p = subparsers.add_parser("export-csv")
+p.add_argument("--paid-only", action="store_true")
+p.add_argument("--unpaid-only", action="store_true")
+p.add_argument("--client-id", type=int)
+p.add_argument("--from-date", type=date.fromisoformat)
+p.add_argument("--to-date", type=date.fromisoformat)
+
 
 args = parser.parse_args()
 
@@ -82,7 +91,8 @@ elif args.command == "add-invoice-with-items":
     issue_date = args.issue_date    
     due_date = (issue_date + timedelta(days=7)).isoformat()
     invoice_code = add_invoice_with_items(args.client_id, issue_date, due_date)
-    generate_invoice_pdf(invoice_code)
+    if invoice_code and not args.no_pdf:
+        generate_invoice_pdf(invoice_code)
 
 elif args.command == "remove-invoice":
     remove_invoice(args.invoice_code)
@@ -111,3 +121,5 @@ elif args.command == "generate-pdf":
 elif args.command == "backup-database":
     backup_database()
 
+elif args.command == "export-csv":
+    export_csv()
