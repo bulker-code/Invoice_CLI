@@ -55,10 +55,11 @@ python invoice_cli.py show-clients
 +----+------------+-------------------+-------------+---------------------------+
 ```
 
-**add-invoice-with-items** - Create a new invoice interactively, prompting for line items. PDF is automatically generated and saved on completion.
+**add-invoice-with-items** - Create a new invoice interactively, prompting for line items. PDF is automatically generated and saved on completion, unless `--no-pdf` is passed.
 
 ```
 python invoice_cli.py add-invoice-with-items --client-id 1 --issue-date 2026-07-09
+python invoice_cli.py add-invoice-with-items --client-id 1 --issue-date 2026-07-09 --no-pdf
 ```
 
 **remove-invoice** - Removes invoice by code
